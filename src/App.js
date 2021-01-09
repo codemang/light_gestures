@@ -1,19 +1,45 @@
-// 1. Install dependencies DONE
-// 2. Import dependencies DONE
-// 3. Setup webcam and canvas DONE
-// 4. Define references to those DONE
-// 5. Load handpose DONE
-// 6. Detect function DONE
-// 7. Drawing utilities DONE
-// 8. Draw functions DONE
-
 import React, { useRef } from "react";
 // import logo from './logo.svg';
 import * as tf from "@tensorflow/tfjs";
 import * as handpose from "@tensorflow-models/handpose";
 import Webcam from "react-webcam";
 import "./App.css";
-import { drawHand } from "./utilities";
+import HandTracker from './hand_tracker';
+import Light from './light';
+import Hand from './hand';
+import apiClient from './api_client';
+
+// import { updateColor, loadLight } from './udp';
+
+let light = undefined;
+let light2 = undefined
+
+// loadLight(light2);
+//
+// Light.lights().then(lights => {
+//   light = new Light(lights[0])
+// });
+
+const handleHandMoved = direction => {
+  if (direction === 'Up') {
+    // light.updateBrightness(10);
+    // light.increaseBrightness(0.20);
+    // apiClient.post('update-brightness', { amount: 10})
+    // console.log("Increasing brightness");
+  } else if (direction === 'Down') {
+    // light.decreaseBrightness(0.20);
+    // apiClient.post('update-brightness', { amount: -10})
+    // console.log("Decreasing brightness");
+  } else if (direction === 'Left') {
+    // light.decreaseHue(10);
+    // console.log("Decreasing Hue");
+  } else if (direction === 'Right') {
+    // light.increaseHue(10);
+    // console.log("Increasing Hue");
+  }
+}
+
+const handTracker = new HandTracker(handleHandMoved);
 
 function App() {
   const webcamRef = useRef(null);
@@ -27,6 +53,8 @@ function App() {
       detect(net);
     }, 100);
   };
+
+  let hasPredictedYet = false
 
   const detect = async (net) => {
     // Check data is available
@@ -50,11 +78,17 @@ function App() {
 
       // Make Detections
       const hand = await net.estimateHands(video);
-      console.log(hand);
-
-      // Draw mesh
+      if (!hasPredictedYet) {
+        console.log("First prediction");
+        hasPredictedYet = true;
+      }
       const ctx = canvasRef.current.getContext("2d");
-      drawHand(hand, ctx);
+      // drawHand(hand, ctx);
+
+      if (hand.length > 0) {
+        handTracker.track(hand[0].landmarks);
+        // Hand.draw(hand, ctx)
+      }
     }
   };
 

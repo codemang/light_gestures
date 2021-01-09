@@ -1,4 +1,5 @@
-// Points for fingers
+import _ from 'lodash';
+
 const fingerJoints = {
   thumb: [0, 1, 2, 3, 4],
   indexFinger: [0, 5, 6, 7, 8],
@@ -32,10 +33,8 @@ const style = {
   20: { color: "gold", size: 6 },
 };
 
-// Drawing function
-export const drawHand = (predictions, ctx) => {
-  // Check if we have predictions
-  if (predictions.length > 0) {
+class Hand {
+  static draw(predictions, ctx) {
     // Loop through each prediction
     predictions.forEach((prediction) => {
       // Grab landmarks
@@ -79,7 +78,35 @@ export const drawHand = (predictions, ctx) => {
         // Set line color
         ctx.fillStyle = style[i]["color"];
         ctx.fill();
+        return
       }
     });
   }
+
+  static isOpen(hand) {
+    const deltas = []
+
+    // Loop through fingers
+    for (let j = 0; j < Object.keys(fingerJoints).length; j++) {
+      let finger = Object.keys(fingerJoints)[j];
+      //  Loop through pairs of joints
+      for (let k = 0; k < fingerJoints[finger].length - 1; k++) {
+        // Get pairs of joints
+        const firstJointIndex = fingerJoints[finger][k];
+        const secondJointIndex = fingerJoints[finger][k + 1];
+
+        deltas.push(hand[firstJointIndex][1] - hand[secondJointIndex][1])
+      }
+    }
+
+    if (_.every(deltas, delta => delta > 0)) {
+      return 1;
+    } else if (_.every(deltas, delta => delta < 0)) {
+      return 0;
+    } else {
+      return -1;
+    }
+  }
 };
+
+export default Hand;
