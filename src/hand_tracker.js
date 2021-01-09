@@ -1,6 +1,6 @@
 import Hand from './hand';
 
-const BUFFER_SIZE = 5;
+const BUFFER_SIZE = 3;
 
 const linearRegression = (y,x) => {
   var lr = {};
@@ -46,9 +46,24 @@ class HandTracker {
     this.handleHandMoved = handleHandMoved;
   }
 
-  track(hand) {
+  track(hand, ctx) {
     if (Hand.isOpen(hand) !== 1) {
       return;
+    }
+
+    if (this.palmLocationBuffer.length >= 1) {
+      const lastPalm = this.palmLocationBuffer[this.palmLocationBuffer.length - 1];
+
+      // In testing, more than 150px distance usually means you moved your hand
+      // to the other side of the screen.
+      if (Hand.distanceBetween(hand[0], lastPalm) > 150) {
+        this.palmLocationBuffer = [hand[0]];
+        this.palmMovementSlopeBuffer = [];
+        return;
+      }
+      // ctx.font = "30px Arial";
+      // ctx.fillStyle = "red";
+      // ctx.fillText(Hand.distanceBetween(hand[0], lastPalm), 10, 50);
     }
 
     this.palmLocationBuffer.push(hand[0])
@@ -57,12 +72,11 @@ class HandTracker {
       return;
     }
 
-
     if (this.palmLocationBuffer.length > BUFFER_SIZE) {
       this.palmLocationBuffer.shift();
     }
 
-    console.log(this.palmLocationBuffer[4][1] - this.palmLocationBuffer[3][1])
+    // console.log(this.palmLocationBuffer[4][1] - this.palmLocationBuffer[3][1])
 
     const palmYs = this.palmLocationBuffer.map(elm => elm[1]);
     const palmXs = this.palmLocationBuffer.map(elm => elm[0]);

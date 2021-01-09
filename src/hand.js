@@ -34,6 +34,12 @@ const style = {
 };
 
 class Hand {
+  static distanceBetween(hand1, hand2) {
+    const xDelta = Math.abs(hand1[0] - hand2[0]);
+    const yDelta = Math.abs(hand1[1] - hand2[1]);
+    return Math.sqrt(xDelta * xDelta + yDelta * yDelta);
+  }
+
   static draw(predictions, ctx) {
     // Loop through each prediction
     predictions.forEach((prediction) => {
