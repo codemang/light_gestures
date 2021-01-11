@@ -1,9 +1,21 @@
 const http = require('http');
 const LifxUdpClient = require('./udp');
-var qs = require('querystring');
 
 let light;
 LifxUdpClient.loadLight('Nate', _light => light = _light);
+
+const readBody = (req, callback) => {
+  let body = '';
+
+  req.on('data', data => {
+    body += data;
+  });
+
+  req.on('end', function () {
+    const jsonBody = JSON.parse(body);
+    callback(jsonBody);
+  });
+};
 
 http.createServer(function (req, res) {
   // Set CORS headers
@@ -24,18 +36,14 @@ http.createServer(function (req, res) {
   var url = req.url;
 
   if (url === '/update-brightness') {
-    let body = '';
-
-    req.on('data', data => {
-      body += data;
-    });
-
-    req.on('end', function () {
-      const jsonBody = JSON.parse(body);
+    readBody(req, jsonBody => {
       LifxUdpClient.updateBrightness(light, parseInt(jsonBody.amount))
     });
-      // updateBrightness
-    res.write(' Welcome to about us page');
+    res.end();
+  }
+
+  if (url === '/toggle-power') {
+    LifxUdpClient.togglePower(light);
     res.end();
   }
 }).listen(4000, function() {

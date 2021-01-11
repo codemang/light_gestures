@@ -1,5 +1,4 @@
 const LifxClient = require('node-lifx').Client;
-// import { Client } from 'node-lifx';
 const client = new LifxClient();
 const _ = require('lodash');
 
@@ -25,6 +24,17 @@ const updateBrightness = (light, amount) => {
   })
 };
 
+const togglePower = light => {
+  light.getState((error, state) => {
+    if (state.power === 1) {
+      light.off(300);
+    } else {
+      light.color(state.color.hue, state.color.saturation, 100, 3500, 0); // Fading the light on over two seconds
+      light.on(300);
+    }
+  })
+};
+
 const updateColor = (light, args) => {
   light.getState((error, state) => {
     if (state.label !== 'Nate') {
@@ -35,30 +45,4 @@ const updateColor = (light, args) => {
   });
 };
 
-module.exports = { loadLight, updateColor, updateBrightness };
-
-
-// client.on('light-new', function(light) {
-//
-//   light.getState((error, state) => {
-//     if (state.label !== 'Nate') {
-//       return
-//     }
-//     console.log("Here")
-//
-//     console.log(state.color);
-//     let counter = 0;
-//
-//     const func = () => {
-//       counter += 1;
-//       // console.log(light.color);
-//       // console.log((10 - counter) * 10)
-//       console.log(counter);
-//       light.color(state.color.hue, state.color.saturation, (10 - counter) * 10, 3500, 500); // Fading the light on over two seconds
-//     };
-//
-//     setInterval(func.bind(this), 500)
-//   });
-//   // console.log("Done")
-//   // Change light state here
-// });
+module.exports = { loadLight, updateColor, updateBrightness, togglePower };
