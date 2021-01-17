@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 // import logo from './logo.svg';
 import * as tf from "@tensorflow/tfjs";
 import * as handpose from "@tensorflow-models/handpose";
@@ -41,6 +41,9 @@ function RpiRunner() {
   let hasPredictedYet = false
 
   const detect = async (net) => {
+    if (!canvasRef.current) {
+      return;
+    }
   // Check data is available
     const ctx = canvasRef.current.getContext("2d");
     const hand = await net.estimateHands(canvasRef);
@@ -58,8 +61,12 @@ function RpiRunner() {
 
   runHandpose();
 
-  const client = new WebSocket('ws://' + window.location.hostname + ':${8084}/');
-  const player = new window.jsmpeg(client, {canvas: canvasRef});
+  useEffect(() => {
+    if (canvasRef.current) {
+      const client = new WebSocket('ws://' + window.location.hostname + ':8084/');
+      const player = new window.jsmpeg(client, {canvas: canvasRef.current});
+    }
+  }, [canvasRef]);
 
   return (
     <div className="App">
