@@ -58,7 +58,7 @@ function RpiRunner() {
 
   runHandpose();
 
-  const client = new WebSocket('ws://' + window.location.hostname + ':${WS_PORT}/');
+  const client = new WebSocket('ws://' + window.location.hostname + ':${8084}/');
   const player = new window.jsmpeg(client, {canvas: canvasRef});
 
   return (

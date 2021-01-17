@@ -43,20 +43,9 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
         self.do_GET()
 
     def do_GET(self):
+        return
         if self.path == '/':
-            self.send_response(301)
-            self.send_header('Location', '/index.html')
-            self.end_headers()
             return
-        elif self.path == '/jsmpg.js':
-            content_type = 'application/javascript'
-            content = self.server.jsmpg_content
-        elif self.path == '/index.html':
-            content_type = 'text/html; charset=utf-8'
-            tpl = Template(self.server.index_template)
-            content = tpl.safe_substitute(dict(
-                WS_PORT=WS_PORT, WIDTH=WIDTH, HEIGHT=HEIGHT, COLOR=COLOR,
-                BGCOLOR=BGCOLOR))
         else:
             self.send_error(404, 'File not found')
             return
@@ -147,8 +136,8 @@ def main():
         websocket_server.initialize_websockets_manager()
         websocket_thread = Thread(target=websocket_server.serve_forever)
         print('Initializing HTTP server on port %d' % HTTP_PORT)
-        http_server = StreamingHttpServer()
-        http_thread = Thread(target=http_server.serve_forever)
+        #  http_server = StreamingHttpServer()
+        #  http_thread = Thread(target=http_server.serve_forever)
         print('Initializing broadcast thread')
         output = BroadcastOutput(camera)
         broadcast_thread = BroadcastThread(output.converter, websocket_server)
@@ -158,7 +147,7 @@ def main():
             print('Starting websockets thread')
             websocket_thread.start()
             print('Starting HTTP server thread')
-            http_thread.start()
+            #  http_thread.start()
             print('Starting broadcast thread')
             broadcast_thread.start()
             while True:
